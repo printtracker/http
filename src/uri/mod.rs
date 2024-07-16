@@ -133,7 +133,6 @@ enum ErrorKind {
     InvalidPort,
     InvalidFormat,
     SchemeMissing,
-    AuthorityMissing,
     PathAndQueryMissing,
     TooLong,
     Empty,
@@ -238,10 +237,6 @@ impl Uri {
     /// ```
     pub fn from_parts(src: Parts) -> Result<Uri, InvalidUriParts> {
         if src.scheme.is_some() {
-            if src.authority.is_none() {
-                return Err(ErrorKind::AuthorityMissing.into());
-            }
-
             if src.path_and_query.is_none() {
                 return Err(ErrorKind::PathAndQueryMissing.into());
             }
@@ -249,22 +244,11 @@ impl Uri {
             return Err(ErrorKind::SchemeMissing.into());
         }
 
-        let scheme = match src.scheme {
-            Some(scheme) => scheme,
-            None => Scheme {
-                inner: Scheme2::None,
-            },
-        };
-
-        let authority = match src.authority {
-            Some(authority) => authority,
-            None => Authority::empty(),
-        };
-
-        let path_and_query = match src.path_and_query {
-            Some(path_and_query) => path_and_query,
-            None => PathAndQuery::empty(),
-        };
+        let scheme = src.scheme.unwrap_or_else(|| Scheme {
+            inner: Scheme2::None,
+        });
+        let authority = src.authority.unwrap_or_else(|| Authority::empty());
+        let path_and_query = src.path_and_query.unwrap_or_else(|| PathAndQuery::empty());
 
         Ok(Uri {
             scheme,
@@ -768,6 +752,20 @@ impl<'a> TryFrom<&'a Uri> for Uri {
     }
 }
 
+impl<'a> TryFrom<(Scheme, &'a str)> for Uri  {
+    type Error = InvalidUri;
+
+    fn try_from((scheme, uri): (Scheme, &'a str)) -> Result<Self, Self::Error> {
+        let uri = Bytes::copy_from_slice(uri.as_bytes());
+        let uri = Uri {
+            scheme,
+            authority: Authority::empty(),
+            path_and_query: PathAndQuery::from_shared(uri)?,
+        };
+        Ok(uri)
+    }
+}
+
 /// Convert an `Authority` into a `Uri`.
 impl From<Authority> for Uri {
     fn from(authority: Authority) -> Self {
@@ -1068,7 +1066,6 @@ impl InvalidUri {
             ErrorKind::InvalidPort => "invalid port",
             ErrorKind::InvalidFormat => "invalid format",
             ErrorKind::SchemeMissing => "scheme missing",
-            ErrorKind::AuthorityMissing => "authority missing",
             ErrorKind::PathAndQueryMissing => "path missing",
             ErrorKind::TooLong => "uri too long",
             ErrorKind::Empty => "empty string",

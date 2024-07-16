@@ -1,6 +1,7 @@
+use std::convert::TryFrom;
 use std::str::FromStr;
 
-use super::{ErrorKind, InvalidUri, Port, Uri, URI_CHARS};
+use super::{ErrorKind, InvalidUri, Port, Scheme, Uri, URI_CHARS};
 
 #[test]
 fn test_char_table() {
@@ -516,4 +517,12 @@ fn test_partial_eq_path_with_terminating_questionmark() {
     let uri = Uri::from_str("/path?").expect("first parse");
 
     assert_eq!(uri, a);
+}
+
+#[test]
+fn test_uri_from_scheme_and_str() {
+    let uri = Uri::try_from((Scheme::HTTPS, "/foo/bar?baz=quux")).expect("parsing uri from scheme and str");
+    assert_eq!(uri.scheme(), Some(&Scheme::HTTPS));
+    assert_eq!(uri.path(), "/foo/bar");
+    assert_eq!(uri.query(), Some("baz=quux"));
 }
