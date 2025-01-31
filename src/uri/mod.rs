@@ -94,9 +94,9 @@ mod tests;
 /// ```
 #[derive(Clone)]
 pub struct Uri {
-    scheme: Scheme,
-    authority: Authority,
-    path_and_query: PathAndQuery,
+    pub scheme: Scheme,
+    pub authority: Authority,
+    pub path_and_query: PathAndQuery,
 }
 
 /// The various parts of a URI.

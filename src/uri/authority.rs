@@ -50,6 +50,12 @@ impl Authority {
             .expect("static str is not valid authority")
     }
 
+    pub fn from_port(port: u16) -> Self {
+        Authority {
+            data: ByteStr::from(format!(":{}", port)),
+        }
+    }
+
     /// Attempt to convert a `Bytes` buffer to a `Authority`.
     ///
     /// This will try to prevent a copy if the type passed is the type used
@@ -570,6 +576,12 @@ mod tests {
     }
 
     #[test]
+    fn test_from_port() {
+        let authority = Authority::from_port(8080).to_string();
+        assert_eq!(authority, ":8080");
+    }
+
+    #[test]
     fn not_equal_with_a_str_of_a_different_authority() {
         let authority: Authority = "example.com".parse().unwrap();
         assert_ne!(&authority, "test.com");
@@ -681,4 +693,5 @@ mod tests {
         let err = Authority::parse_non_empty(b"]o[").unwrap_err();
         assert_eq!(err.0, ErrorKind::InvalidAuthority);
     }
+
 }
