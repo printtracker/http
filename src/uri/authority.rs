@@ -50,6 +50,7 @@ impl Authority {
             .expect("static str is not valid authority")
     }
 
+    /// Create an `Authority` from a port number only.
     pub fn from_port(port: u16) -> Self {
         Authority {
             data: ByteStr::from(format!(":{}", port)),

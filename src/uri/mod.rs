@@ -94,8 +94,11 @@ mod tests;
 /// ```
 #[derive(Clone)]
 pub struct Uri {
+    /// The scheme component of a URI
     pub scheme: Scheme,
+    /// The authority component of a URI
     pub authority: Authority,
+    /// The path and query component of a URI
     pub path_and_query: PathAndQuery,
 }
 
