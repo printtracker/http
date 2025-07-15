@@ -1106,6 +1106,11 @@ impl<'a> From<StandardHeader> for HdrName<'a> {
 }
 
 impl HeaderName {
+    /// Converts any string into an HTTP header. Callers can bypass all casing restrictions
+    pub fn from_any(src: &str) -> Self {
+        Custom(ByteStr::from(src)).into()
+    }
+
     /// Converts a slice of bytes to an HTTP header name.
     ///
     /// This function normalizes the input.
